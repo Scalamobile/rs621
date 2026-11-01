@@ -22,18 +22,15 @@ use {
 /// Chunk size used for iterators performing requests
 const ITER_CHUNK_SIZE: u64 = 320;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum PostFileExtension {
-    #[serde(rename = "jpg")]
     Jpeg,
-    #[serde(rename = "png")]
     Png,
-    #[serde(rename = "gif")]
     Gif,
-    #[serde(rename = "swf")]
     Swf,
-    #[serde(rename = "webm")]
     WebM,
+    Mp4,
+    Other(String),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
@@ -287,6 +284,25 @@ impl<'a> PostSearchStream<'a> {
             chunk: Vec::new(),
             ended: false,
         }
+    }
+}
+
+impl<'de> Deserialize<'de> for PostFileExtension {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let ext = String::deserialize(deserializer)?;
+
+        Ok(match ext.as_str() {
+            "jpg" => Self::Jpeg,
+            "png" => Self::Png,
+            "gif" => Self::Gif,
+            "swf" => Self::Swf,
+            "webm" => Self::WebM,
+            "mp4" => Self::Mp4,
+            _ => Self::Other(ext),
+        })
     }
 }
 
