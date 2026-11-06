@@ -22,22 +22,11 @@ use {
 /// Chunk size used for iterators performing requests
 const ITER_CHUNK_SIZE: u64 = 320;
 
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub enum PostFileExtension {
-    Jpeg,
-    Png,
-    Gif,
-    Swf,
-    WebM,
-    Mp4,
-    Other(String),
-}
-
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub struct PostFile {
     pub width: u64,
     pub height: u64,
-    pub ext: PostFileExtension,
+    pub ext: String, //orriginaly was PostFileExtension
     pub size: u64,
     pub md5: String,
     pub url: Option<String>,
@@ -287,24 +276,7 @@ impl<'a> PostSearchStream<'a> {
     }
 }
 
-impl<'de> Deserialize<'de> for PostFileExtension {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        let ext = String::deserialize(deserializer)?;
 
-        Ok(match ext.as_str() {
-            "jpg" => Self::Jpeg,
-            "png" => Self::Png,
-            "gif" => Self::Gif,
-            "swf" => Self::Swf,
-            "webm" => Self::WebM,
-            "mp4" => Self::Mp4,
-            _ => Self::Other(ext),
-        })
-    }
-}
 
 impl<'a> Stream for PostSearchStream<'a> {
     type Item = Rs621Result<Post>;
